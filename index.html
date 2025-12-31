@@ -64,13 +64,15 @@
         }
 
         function openAdmin() {
-            const pw = prompt("Masukkan Password Admin:");
-            if (pw === "limau123") {
-                window.open(`https://docs.google.com/spreadsheets/d/1yWk0S8m2E0XmP7i8q9E8p_G-m076zO0WdK9B_8p2_0k/edit`, '_blank');
-            } else {
-                alert("Password Salah!");
-            }
-        }
+    const pw = prompt("Masukkan Password Admin:");
+    // Pastikan "limau123" ini ditukar jika anda tukar di Google Sheets
+    if (pw === "limau123") { 
+        window.open("https://docs.google.com/spreadsheets/d/11FpenLRTpP95MClKwAz3uG9Fr4iqbUJCBmdVl6UD7So/edit", "_blank");
+    } else {
+        alert("Password Salah!");
+    }
+}
+
 
         document.getElementById('orderForm').onsubmit = async (e) => {
             e.preventDefault();
