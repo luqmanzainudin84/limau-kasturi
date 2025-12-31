@@ -64,13 +64,10 @@
         }
 
         function openAdmin() {
-    const pw = prompt("Masukkan Password Admin:");
-    // Pastikan "limau123" ini ditukar jika anda tukar di Google Sheets
-    if (pw === "limau123") { 
-        window.open("https://docs.google.com/spreadsheets/d/11FpenLRTpP95MClKwAz3uG9Fr4iqbUJCBmdVl6UD7So/edit", "_blank");
-    } else {
-        alert("Password Salah!");
-    }
+    // Terus buka page admin.html di dalam repo yang sama
+    window.location.href = "admin.html";
+}
+
 }
 
 
