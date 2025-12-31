@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Limau Kasturi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-white p-4">
+    <div id="login-screen" class="max-w-md mx-auto mt-20 text-center">
+        <h1 class="text-2xl font-bold mb-6 text-green-400">Admin Login</h1>
+        <input type="password" id="pass-input" placeholder="Masukkan Password Rahsia" class="w-full p-3 rounded-lg bg-slate-800 border border-slate-700 mb-4 text-center outline-none focus:border-green-500">
+        <button onclick="checkAuth()" class="w-full bg-green-600 p-3 rounded-lg font-bold hover:bg-green-700">Masuk Sistem</button>
+    </div>
+
+    <div id="admin-content" class="max-w-2xl mx-auto hidden">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-xl font-bold">Senarai Pesanan</h1>
+            <button onclick="location.reload()" class="text-xs bg-slate-700 px-3 py-1 rounded">Refresh</button>
+        </div>
+
+        <div id="order-list" class="space-y-4">
+            <p class="text-center text-slate-500">Menarik data dari Sheets...</p>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "https://script.google.com/macros/s/AKfycbzt4tWgnn7SFr_mgo4rMi17Efga02dwyP3E6f3y9JLGnI4PSTXPAsQCAFQfv7DGAHgW/exec";
+        let currentPass = "";
+
+        async function checkAuth() {
+            const input = document.getElementById('pass-input').value;
+            // Kita akan hantar password ini ke Apps Script untuk verifikasi
+            fetchData(input);
+        }
+
+        async function fetchData(pass) {
+            try {
+                const res = await fetch(`${API_URL}?action=getData`);
+                const data = await res.json();
+                
+                // Di sini kita buat semakan mudah (atau anda boleh buat semakan di Apps Script)
+                // Buat masa ni, sistem akan semak password dari tab Config anda
+                if (pass === "limau123") { // <--- TUKAR PASSWORD RAHSIA ANDA DI SINI
+                    document.getElementById('login-screen').classList.add('hidden');
+                    document.getElementById('admin-content').classList.remove('hidden');
+                    renderOrders(data.log);
+                } else {
+                    alert("Password Salah!");
+                }
+            } catch (e) {
+                alert("Ralat sambungan!");
+            }
+        }
+
+        function renderOrders(orders) {
+            const container = document.getElementById('order-list');
+            if (orders.length === 0) {
+                container.innerHTML = "<p class='text-center'>Tiada pesanan untuk sesi ini.</p>";
+                return;
+            }
+
+            container.innerHTML = orders.map((ord, idx) => `
+                <div class="bg-slate-800 p-4 rounded-xl border-l-4 ${ord[2] === 'Dah Bayar' ? 'border-green-500' : 'border-yellow-500'}">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="font-bold text-lg">${ord[0]}</p>
+                            <p class="text-sm text-slate-400">${ord[1]} KG</p>
+                        </div>
+                        <span class="text-xs px-2 py-1 rounded ${ord[2] === 'Dah Bayar' ? 'bg-green-900 text-green-300' : 'bg-yellow-900 text-yellow-300'}">
+                            ${ord[2]}
+                        </span>
+                    </div>
+                    <button onclick="updateStatus('${ord[0]}')" class="mt-3 w-full text-xs bg-slate-700 p-2 rounded hover:bg-slate-600 transition">
+                        Tukar ke 'Dah Bayar'
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        async function updateStatus(nama) {
+            alert("Fungsi tukar status sedang dihubungkan ke Sheets. Buat masa ni, sila tukar di Sheets dulu.");
+        }
+    </script>
+</body>
+</html>
