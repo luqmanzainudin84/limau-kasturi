@@ -3,62 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Admin - Jualan Limau</title>
+    <title>Admin Dashboard - Limau</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .loader {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #22c55e;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            animation: spin 1s linear infinite;
-            display: inline-block;
-            vertical-align: middle;
-        }
+        .loader { border: 3px solid #f3f3f3; border-top: 3px solid #22c55e; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; display: inline-block; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="bg-slate-900 text-white p-4 font-sans">
+<body class="bg-[#0f172a] text-white p-4 font-sans min-h-screen">
 
     <div id="login-screen" class="max-w-md mx-auto mt-20 text-center">
-        <div class="bg-slate-800 p-8 rounded-2xl shadow-2xl border border-slate-700">
-            <h1 class="text-3xl font-bold mb-2 text-green-500">Admin Panel</h1>
-            <p class="text-slate-400 mb-8 text-sm">Sila masukkan password rahsia anda</p>
-            
-            <input type="password" id="pass-input" placeholder="Password" 
-                class="w-full p-4 rounded-xl bg-slate-900 border border-slate-700 mb-4 text-center text-xl outline-none focus:border-green-500 transition-all">
-            
-            <button onclick="checkAuth()" id="login-btn"
-                class="w-full bg-green-600 hover:bg-green-700 p-4 rounded-xl font-bold shadow-lg transition-all active:scale-95">
-                Masuk Sistem
-            </button>
-        </div>
+        <h1 class="text-3xl font-bold mb-6 text-green-500 italic">ADMIN PANEL</h1>
+        <input type="password" id="pass-input" placeholder="Masukkan Password" class="w-full p-5 rounded-2xl bg-slate-800 border border-slate-700 mb-4 text-center text-xl outline-none focus:border-green-500">
+        <button onclick="checkAuth()" id="login-btn" class="w-full bg-green-600 p-5 rounded-2xl font-bold text-lg shadow-lg">MASUK SISTEM</button>
     </div>
 
     <div id="admin-content" class="max-w-xl mx-auto hidden pb-20">
-        <div class="flex justify-between items-center mb-6 bg-slate-800 p-4 rounded-xl sticky top-4 z-10 shadow-lg border border-slate-700">
+        <div class="flex justify-between items-center mb-6 bg-slate-800 p-5 rounded-[2rem] border border-slate-700 shadow-xl sticky top-4 z-10">
             <div>
-                <h1 class="font-bold text-lg">Senarai Pesanan</h1>
-                <p id="session-date" class="text-xs text-green-400 font-medium"></p>
-                <p id="unit-price" class="text-[10px] text-slate-400 italic"></p>
+                <h2 class="font-bold text-lg leading-none">Senarai Pesanan</h2>
+                <p id="session-info" class="text-[10px] text-green-400 mt-2 uppercase tracking-widest font-bold"></p>
             </div>
-            <button onclick="refreshData()" class="p-2 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
+            <button onclick="refreshData()" class="p-3 bg-slate-700 rounded-xl hover:bg-slate-600">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
             </button>
         </div>
 
         <div id="order-list" class="space-y-4">
-            <div class="text-center py-10">
-                <div class="loader mr-2"></div> Menarik data...
-            </div>
+            <div class="text-center py-10 opacity-50 italic">Memuatkan data...</div>
         </div>
 
-        <button onclick="logout()" class="mt-12 w-full text-slate-500 text-xs hover:text-red-400 transition-colors uppercase tracking-widest font-bold">
-            Logout & Padam Memori
-        </button>
+        <button onclick="logout()" class="mt-12 w-full text-slate-500 text-[10px] font-bold uppercase tracking-[0.3em]">LOGOUT & CLEAR CACHE</button>
     </div>
 
     <script>
@@ -70,77 +45,63 @@
             if (savedPass) fetchData(savedPass);
         };
 
-        function checkAuth() {
-            const input = document.getElementById('pass-input').value;
-            if (!input) return alert("Sila isi password!");
-            fetchData(input);
+        async function checkAuth() {
+            fetchData(document.getElementById('pass-input').value);
         }
 
         async function fetchData(pass) {
-            const btn = document.getElementById('login-btn');
-            btn.innerText = "Menyemak...";
-            btn.disabled = true;
-
             try {
                 const res = await fetch(`${API_URL}?action=getData`);
                 const data = await res.json();
                 
                 if (pass === data.pw) {
                     localStorage.setItem('admin_pass_limau', pass);
-                    hargaPerKg = parseFloat(data.harga); // Ambil harga dari Sheets
-                    
+                    hargaPerKg = parseFloat(data.harga);
                     document.getElementById('login-screen').classList.add('hidden');
                     document.getElementById('admin-content').classList.remove('hidden');
-                    document.getElementById('session-date').innerText = "Sesi: " + data.tarikh;
-                    document.getElementById('unit-price').innerText = `Kadar: RM${hargaPerKg}/KG`;
-                    
+                    document.getElementById('session-info').innerText = `${data.tarikh} | RM${data.harga}/KG`;
                     renderOrders(data.log);
                 } else {
                     alert("Password Salah!");
                     localStorage.removeItem('admin_pass_limau');
-                    location.reload();
                 }
-            } catch (e) {
-                alert("Ralat sambungan!");
-            } finally {
-                btn.innerText = "Masuk Sistem";
-                btn.disabled = false;
-            }
+            } catch (e) { alert("Ralat Sambungan!"); }
         }
 
         function renderOrders(orders) {
             const container = document.getElementById('order-list');
             if (!orders || orders.length === 0) {
-                container.innerHTML = `<div class="text-center bg-slate-800 p-10 rounded-2xl">Tiada pesanan.</div>`;
+                container.innerHTML = `<div class="text-center py-10">Tiada pesanan.</div>`;
                 return;
             }
 
             container.innerHTML = orders.map(ord => {
                 const isPaid = ord[2] === 'Dah Bayar';
-                const totalHarga = (parseFloat(ord[1]) * hargaPerKg).toFixed(2); // Kira harga automatik
-                
+                const total = (parseFloat(ord[1]) * hargaPerKg).toFixed(2);
+                const noTel = ord[3] ? ord[3].toString().replace(/\D/g, '') : '';
+                const waLink = noTel.startsWith('6') ? noTel : '6' + noTel;
+
                 return `
-                <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-sm transition-all">
+                <div class="bg-slate-800 p-6 rounded-[2rem] border border-slate-700 shadow-lg">
                     <div class="flex justify-between items-start mb-4">
                         <div>
-                            <p class="font-bold text-xl text-white leading-tight">${ord[0]}</p>
-                            <p class="text-slate-400 text-sm">${ord[1]} KG x RM${hargaPerKg}</p>
-                            <p class="text-green-400 font-black text-lg">RM${totalHarga}</p>
+                            <p class="font-bold text-xl">${ord[0]}</p>
+                            <p class="text-green-400 font-black text-lg">RM${total} <span class="text-[10px] text-slate-400 font-normal">(${ord[1]} KG)</span></p>
                         </div>
-                        <span class="text-[10px] uppercase px-3 py-1 rounded-full font-black ${isPaid ? 'bg-green-900 text-green-300' : 'bg-orange-900 text-orange-300'}">
+                        <span class="text-[9px] font-black px-3 py-1 rounded-full ${isPaid ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-orange-500/20 text-orange-400 border border-orange-500/30'} uppercase">
                             ${ord[2]}
                         </span>
                     </div>
+
+                    <div class="grid grid-cols-2 gap-3 mb-4">
+                        <a href="https://wa.me/${waLink}" target="_blank" class="bg-[#25D366] text-white p-3 rounded-xl flex items-center justify-center gap-2 font-bold text-xs shadow-lg shadow-green-900/20">WhatsApp</a>
+                        <a href="tel:${noTel}" class="bg-slate-600 text-white p-3 rounded-xl flex items-center justify-center gap-2 font-bold text-xs">Call</a>
+                    </div>
                     
                     ${!isPaid ? `
-                    <button onclick="updateStatus(this, '${ord[0]}')" 
-                        class="w-full bg-green-600 hover:bg-green-700 p-3 rounded-xl text-xs font-bold transition-all">
-                        Tanda 'Dah Bayar'
-                    </button>
+                    <button onclick="updateStatus(this, '${ord[0]}')" class="w-full bg-green-600 p-4 rounded-xl font-bold text-xs uppercase tracking-widest">Tanda 'Dah Bayar'</button>
                     ` : `
-                    <div class="w-full bg-green-900/20 border border-green-900/50 p-3 rounded-xl text-center">
-                        <span class="text-green-500 text-xs font-bold">✓ Pembayaran Selesai</span>
-                    </div>
+                    <div class="w-full bg-slate-900/50 p-3 rounded-xl text-center text-xs font-bold text-green-500 border border-green-900/30">✓ PEMBAYARAN SELESAI</div>
                     `}
                 </div>`;
             }).join('');
@@ -148,19 +109,8 @@
 
         async function updateStatus(btn, nama) {
             btn.innerHTML = `<div class="loader"></div>`;
-            btn.disabled = true;
-            try {
-                await fetch(API_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    body: JSON.stringify({ action: 'updateStatus', nama: nama })
-                });
-                setTimeout(() => { fetchData(localStorage.getItem('admin_pass_limau')); }, 1000);
-            } catch (e) {
-                alert("Gagal kemaskini.");
-                btn.innerText = "Tanda 'Dah Bayar'";
-                btn.disabled = false;
-            }
+            await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'updateStatus', nama: nama }) });
+            setTimeout(() => fetchData(localStorage.getItem('admin_pass_limau')), 1000);
         }
 
         function refreshData() { fetchData(localStorage.getItem('admin_pass_limau')); }
