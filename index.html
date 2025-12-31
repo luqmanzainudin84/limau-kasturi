@@ -3,86 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jualan Limau Kasturi Kampung</title>
+    <title>Limau Kasturi Kampung</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-green-50 p-5">
-
-    <div class="max-w-md mx-auto bg-white p-6 rounded-xl shadow-md">
-        <h1 class="text-2xl font-bold text-green-700 mb-2">Limau Kasturi Segar</h1>
+<body class="bg-green-50 p-4">
+    <div class="max-w-md mx-auto bg-white p-6 rounded-2xl shadow-lg border border-green-100">
+        <h1 class="text-3xl font-extrabold text-green-700 mb-4 text-center">Limau Kasturi Segar</h1>
         
-        <div id="info-admin" class="mb-6 p-3 bg-green-100 rounded-lg text-sm">
-            <p><strong>Tarikh Ambil:</strong> <span id="t-tarikh">Loading...</span></p>
-            <p><strong>Lokasi:</strong> <span id="t-lokasi">Loading...</span></p>
+        <div class="bg-green-100 p-4 rounded-xl mb-6 text-sm shadow-inner">
+            <p><strong>Tarikh Ambil:</strong> <span id="t-tarikh">Memuatkan...</span></p>
+            <p><strong>Lokasi:</strong> <span id="t-lokasi">Memuatkan...</span></p>
             <p><strong>Harga:</strong> RM <span id="t-harga">0.00</span>/kg</p>
         </div>
 
-        <div class="flex border-b mb-4">
-            <button onclick="showTab('order')" class="py-2 px-4 focus:outline-none border-b-2 border-green-500">Borang Order</button>
-            <button onclick="showTab('log')" class="py-2 px-4 focus:outline-none">Log Order</button>
+        <div class="flex space-x-2 border-b mb-6 text-sm font-bold">
+            <button onclick="switchTab('order')" id="btn-order" class="pb-2 border-b-2 border-green-600 text-green-600">Borang</button>
+            <button onclick="switchTab('log')" id="btn-log" class="pb-2 text-gray-400">Log</button>
+            <button onclick="openAdmin()" id="btn-admin" class="pb-2 text-gray-400 text-xs ml-auto">Admin</button>
         </div>
 
         <div id="tab-order">
             <form id="orderForm" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium">Nama Anda</label>
-                    <input type="text" id="nama" class="w-full border p-2 rounded" required>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium">No. WhatsApp (Contoh: 0123456789)</label>
-                    <input type="tel" id="whatsapp" class="w-full border p-2 rounded" required>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium">Kuantiti (kg)</label>
-                    <input type="number" id="kuantiti" class="w-full border p-2 rounded" required>
-                </div>
-                <button type="submit" id="btnHantar" class="w-full bg-green-600 text-white py-2 rounded-lg font-bold hover:bg-green-700">Hantar Pesanan</button>
+                <input type="text" id="nama" placeholder="Nama Anda" class="w-full p-3 border rounded-xl bg-gray-50 focus:ring-2 focus:ring-green-500 outline-none" required>
+                <input type="tel" id="whatsapp" placeholder="No. WhatsApp" class="w-full p-3 border rounded-xl bg-gray-50 focus:ring-2 focus:ring-green-500 outline-none" required>
+                <input type="number" id="kuantiti" placeholder="Kuantiti (kg)" class="w-full p-3 border rounded-xl bg-gray-50 focus:ring-2 focus:ring-green-500 outline-none" required>
+                <button type="submit" id="submitBtn" class="w-full bg-green-600 text-white p-3 rounded-xl font-bold shadow-md hover:bg-green-700 transition">Hantar Pesanan</button>
             </form>
         </div>
 
         <div id="tab-log" class="hidden">
-            <h2 class="font-bold mb-2">Senarai Pesanan Terkini:</h2>
-            <div id="logContent" class="text-sm space-y-2">
-                Loading log...
-            </div>
+            <div id="logList" class="space-y-2 text-sm text-gray-600">Memuatkan log pesanan...</div>
         </div>
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzt4tWgnn7SFr_mgo4rMi17Efga02dwyP3E6f3y9JLGnI4PSTXPAsQCAFQfv7DGAHgW/exec";
+        const API_URL = "https://script.google.com/macros/s/AKfycbzt4tWgnn7SFr_mgo4rMi17Efga02dwyP3E6f3y9JLGnI4PSTXPAsQCAFQfv7DGAHgW/exec";
 
-        // Ambil data tarikh & log masa mula-mula buka web
-        window.onload = function() {
-            fetch(SCRIPT_URL + "?action=getData")
-            .then(res => res.json())
-            .then(data => {
+        async function loadData() {
+            try {
+                const response = await fetch(`${API_URL}?action=getData`);
+                const data = await response.json();
                 document.getElementById('t-tarikh').innerText = data.tarikh;
                 document.getElementById('t-lokasi').innerText = data.lokasi;
                 document.getElementById('t-harga').innerText = data.harga;
                 
-                let logHtml = "";
-                data.log.forEach(row => {
-                    logHtml += `<div class='border-b py-1'>${row[0]} - ${row[1]}kg <span class='text-blue-500'>(${row[2]})</span></div>`;
-                });
-                document.getElementById('logContent').innerHTML = logHtml || "Tiada pesanan lagi.";
-            });
-        };
-
-        // Fungsi tukar tab
-        function showTab(tab) {
-            if(tab === 'order') {
-                document.getElementById('tab-order').classList.remove('hidden');
-                document.getElementById('tab-log').classList.add('hidden');
-            } else {
-                document.getElementById('tab-order').classList.add('hidden');
-                document.getElementById('tab-log').classList.remove('hidden');
+                const logHtml = data.log.length > 0 
+                    ? data.log.map(r => `<div class="p-2 border-b flex justify-between"><span>${r[0]}</span><span class="font-bold">${r[1]}kg</span></div>`).join('')
+                    : "Tiada pesanan lagi.";
+                document.getElementById('logList').innerHTML = logHtml;
+            } catch (e) {
+                console.error(e);
             }
         }
 
-        // Simpan Order
-        document.getElementById('orderForm').onsubmit = function(e) {
+        function switchTab(tab) {
+            document.getElementById('tab-order').classList.toggle('hidden', tab !== 'order');
+            document.getElementById('tab-log').classList.toggle('hidden', tab !== 'log');
+            document.getElementById('btn-order').className = tab === 'order' ? 'pb-2 border-b-2 border-green-600 text-green-600' : 'pb-2 text-gray-400';
+            document.getElementById('btn-log').className = tab === 'log' ? 'pb-2 border-b-2 border-green-600 text-green-600' : 'pb-2 text-gray-400';
+        }
+
+        function openAdmin() {
+            const pw = prompt("Masukkan Password Admin:");
+            if (pw === "limau123") {
+                window.open(`https://docs.google.com/spreadsheets/d/1yWk0S8m2E0XmP7i8q9E8p_G-m076zO0WdK9B_8p2_0k/edit`, '_blank');
+            } else {
+                alert("Password Salah!");
+            }
+        }
+
+        document.getElementById('orderForm').onsubmit = async (e) => {
             e.preventDefault();
-            document.getElementById('btnHantar').innerText = "Menghantar...";
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true; btn.innerText = "Menghantar...";
             
             const payload = {
                 action: "addOrder",
@@ -91,15 +84,12 @@
                 kuantiti: document.getElementById('kuantiti').value
             };
 
-            fetch(SCRIPT_URL, {
-                method: "POST",
-                body: JSON.stringify(payload)
-            })
-            .then(res => {
-                alert("Pesanan berjaya dihantar!");
-                location.reload();
-            });
+            await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
+            alert("Berjaya! Jumpa di lokasi nanti.");
+            location.reload();
         };
+
+        window.onload = loadData;
     </script>
 </body>
 </html>
