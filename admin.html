@@ -41,6 +41,7 @@
             <div>
                 <h1 class="font-bold text-lg">Senarai Pesanan</h1>
                 <p id="session-date" class="text-xs text-green-400 font-medium"></p>
+                <p id="unit-price" class="text-[10px] text-slate-400 italic"></p>
             </div>
             <button onclick="refreshData()" class="p-2 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -61,15 +62,12 @@
     </div>
 
     <script>
-        // PASTIKAN URL INI BETUL (URL Apps Script Deployment)
         const API_URL = "https://script.google.com/macros/s/AKfycbzt4tWgnn7SFr_mgo4rMi17Efga02dwyP3E6f3y9JLGnI4PSTXPAsQCAFQfv7DGAHgW/exec";
+        let hargaPerKg = 0;
 
-        // Auto-login jika ada password tersimpan
         window.onload = () => {
             const savedPass = localStorage.getItem('admin_pass_limau');
-            if (savedPass) {
-                fetchData(savedPass);
-            }
+            if (savedPass) fetchData(savedPass);
         };
 
         function checkAuth() {
@@ -87,12 +85,15 @@
                 const res = await fetch(`${API_URL}?action=getData`);
                 const data = await res.json();
                 
-                // Bandingkan input dengan password di tab Config
                 if (pass === data.pw) {
                     localStorage.setItem('admin_pass_limau', pass);
+                    hargaPerKg = parseFloat(data.harga); // Ambil harga dari Sheets
+                    
                     document.getElementById('login-screen').classList.add('hidden');
                     document.getElementById('admin-content').classList.remove('hidden');
                     document.getElementById('session-date').innerText = "Sesi: " + data.tarikh;
+                    document.getElementById('unit-price').innerText = `Kadar: RM${hargaPerKg}/KG`;
+                    
                     renderOrders(data.log);
                 } else {
                     alert("Password Salah!");
@@ -100,8 +101,7 @@
                     location.reload();
                 }
             } catch (e) {
-                alert("Ralat: Pastikan Apps Script telah di-deploy sebagai 'Anyone'.");
-                console.error(e);
+                alert("Ralat sambungan!");
             } finally {
                 btn.innerText = "Masuk Sistem";
                 btn.disabled = false;
@@ -111,30 +111,30 @@
         function renderOrders(orders) {
             const container = document.getElementById('order-list');
             if (!orders || orders.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center bg-slate-800 p-10 rounded-2xl border border-dashed border-slate-700">
-                        <p class="text-slate-500">Tiada pesanan untuk tarikh sesi ini.</p>
-                    </div>`;
+                container.innerHTML = `<div class="text-center bg-slate-800 p-10 rounded-2xl">Tiada pesanan.</div>`;
                 return;
             }
 
             container.innerHTML = orders.map(ord => {
                 const isPaid = ord[2] === 'Dah Bayar';
+                const totalHarga = (parseFloat(ord[1]) * hargaPerKg).toFixed(2); // Kira harga automatik
+                
                 return `
                 <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-sm transition-all">
                     <div class="flex justify-between items-start mb-4">
                         <div>
                             <p class="font-bold text-xl text-white leading-tight">${ord[0]}</p>
-                            <p class="text-green-400 font-bold text-sm">${ord[1]} KG</p>
+                            <p class="text-slate-400 text-sm">${ord[1]} KG x RM${hargaPerKg}</p>
+                            <p class="text-green-400 font-black text-lg">RM${totalHarga}</p>
                         </div>
-                        <span class="text-[10px] uppercase px-3 py-1 rounded-full font-black tracking-tighter ${isPaid ? 'bg-green-900 text-green-300' : 'bg-orange-900 text-orange-300'}">
+                        <span class="text-[10px] uppercase px-3 py-1 rounded-full font-black ${isPaid ? 'bg-green-900 text-green-300' : 'bg-orange-900 text-orange-300'}">
                             ${ord[2]}
                         </span>
                     </div>
                     
                     ${!isPaid ? `
                     <button onclick="updateStatus(this, '${ord[0]}')" 
-                        class="w-full bg-slate-700 hover:bg-green-600 p-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2">
+                        class="w-full bg-green-600 hover:bg-green-700 p-3 rounded-xl text-xs font-bold transition-all">
                         Tanda 'Dah Bayar'
                     </button>
                     ` : `
@@ -147,41 +147,24 @@
         }
 
         async function updateStatus(btn, nama) {
-            const originalText = btn.innerHTML;
             btn.innerHTML = `<div class="loader"></div>`;
             btn.disabled = true;
-
             try {
                 await fetch(API_URL, {
                     method: 'POST',
-                    mode: 'no-cors', // Penting untuk Apps Script POST
+                    mode: 'no-cors',
                     body: JSON.stringify({ action: 'updateStatus', nama: nama })
                 });
-                
-                // Tunggu sekejap dan refresh data
-                setTimeout(() => {
-                    const pass = localStorage.getItem('admin_pass_limau');
-                    fetchData(pass);
-                }, 1000);
-
+                setTimeout(() => { fetchData(localStorage.getItem('admin_pass_limau')); }, 1000);
             } catch (e) {
-                alert("Gagal kemaskini status.");
-                btn.innerHTML = originalText;
+                alert("Gagal kemaskini.");
+                btn.innerText = "Tanda 'Dah Bayar'";
                 btn.disabled = false;
             }
         }
 
-        function refreshData() {
-            const pass = localStorage.getItem('admin_pass_limau');
-            if (pass) fetchData(pass);
-        }
-
-        function logout() {
-            if(confirm("Logout? Anda perlu masukkan password semula nanti.")){
-                localStorage.removeItem('admin_pass_limau');
-                location.reload();
-            }
-        }
+        function refreshData() { fetchData(localStorage.getItem('admin_pass_limau')); }
+        function logout() { localStorage.removeItem('admin_pass_limau'); location.reload(); }
     </script>
 </body>
 </html>
