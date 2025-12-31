@@ -3,92 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Limau Kasturi Kampung</title>
+    <title>Jualan Limau Kasturi - Tempahan Online</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .glass { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); }
+        .spinner { border: 3px solid rgba(255,255,255,0.3); border-top: 3px solid #fff; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; display: inline-block; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
 </head>
-<body class="bg-green-50 p-4">
-    <div class="max-w-md mx-auto bg-white p-6 rounded-2xl shadow-lg border border-green-100">
-        <h1 class="text-3xl font-extrabold text-green-700 mb-4 text-center">Limau Kasturi Segar</h1>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen">
+
+    <header class="p-6 text-center bg-gradient-to-b from-green-900/40 to-transparent">
+        <h1 class="text-4xl font-black text-green-400 tracking-tighter">LIMAU KASTURI</h1>
+        <p class="text-slate-400 text-sm mt-1 uppercase tracking-widest" id="display-lokasi">Segar Dari Kebun</p>
+    </header>
+
+    <main class="max-w-md mx-auto p-4 space-y-6">
         
-        <div class="bg-green-100 p-4 rounded-xl mb-6 text-sm shadow-inner">
-            <p><strong>Tarikh Ambil:</strong> <span id="t-tarikh">Memuatkan...</span></p>
-            <p><strong>Lokasi:</strong> <span id="t-lokasi">Memuatkan...</span></p>
-            <p><strong>Harga:</strong> RM <span id="t-harga">0.00</span>/kg</p>
+        <div class="glass border border-slate-700 p-6 rounded-3xl text-center shadow-xl">
+            <div class="text-xs text-green-400 font-bold uppercase mb-1">Sesi Jualan Akan Datang</div>
+            <div id="display-tarikh" class="text-2xl font-bold mb-2 text-white">---</div>
+            <div id="display-harga" class="text-lg text-slate-300">RM -- / KG</div>
         </div>
 
-        <div class="flex space-x-2 border-b mb-6 text-sm font-bold">
-            <button onclick="switchTab('order')" id="btn-order" class="pb-2 border-b-2 border-green-600 text-green-600">Borang</button>
-            <button onclick="switchTab('log')" id="btn-log" class="pb-2 text-gray-400">Log</button>
-            <button onclick="openAdmin()" id="btn-admin" class="pb-2 text-gray-400 text-xs ml-auto">Admin</button>
-        </div>
+        <section class="bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-2xl">
+            <h2 class="text-xl font-bold mb-6 flex items-center gap-2 text-white">
+                <span class="bg-green-600 w-2 h-6 rounded-full"></span> 
+                Borang Pesanan
+            </h2>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs text-slate-500 mb-2 uppercase font-bold ml-1">Nama Pelanggan</label>
+                    <input type="text" id="nama" placeholder="Masukkan nama anda" 
+                        class="w-full bg-slate-800 border border-slate-700 p-4 rounded-2xl outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all">
+                </div>
 
-        <div id="tab-order">
-            <form id="orderForm" class="space-y-4">
-                <input type="text" id="nama" placeholder="Nama Anda" class="w-full p-3 border rounded-xl bg-gray-50 focus:ring-2 focus:ring-green-500 outline-none" required>
-                <input type="tel" id="whatsapp" placeholder="No. WhatsApp" class="w-full p-3 border rounded-xl bg-gray-50 focus:ring-2 focus:ring-green-500 outline-none" required>
-                <input type="number" id="kuantiti" placeholder="Kuantiti (kg)" class="w-full p-3 border rounded-xl bg-gray-50 focus:ring-2 focus:ring-green-500 outline-none" required>
-                <button type="submit" id="submitBtn" class="w-full bg-green-600 text-white p-3 rounded-xl font-bold shadow-md hover:bg-green-700 transition">Hantar Pesanan</button>
-            </form>
-        </div>
+                <div>
+                    <label class="block text-xs text-slate-500 mb-2 uppercase font-bold ml-1">No. WhatsApp</label>
+                    <input type="tel" id="whatsapp" placeholder="Contoh: 0123456789" 
+                        class="w-full bg-slate-800 border border-slate-700 p-4 rounded-2xl outline-none focus:border-green-500 transition-all">
+                </div>
 
-        <div id="tab-log" class="hidden">
-            <div id="logList" class="space-y-2 text-sm text-gray-600">Memuatkan log pesanan...</div>
-        </div>
-    </div>
+                <div>
+                    <label class="block text-xs text-slate-500 mb-2 uppercase font-bold ml-1 text-center">Jumlah KG</label>
+                    <div class="flex items-center justify-center gap-6 bg-slate-800 p-2 rounded-2xl border border-slate-700">
+                        <button onclick="adjustKg(-1)" class="w-12 h-12 rounded-xl bg-slate-700 text-2xl font-bold">-</button>
+                        <span id="kg-value" class="text-3xl font-black text-green-400 min-w-[60px] text-center">1</span>
+                        <button onclick="adjustKg(1)" class="w-12 h-12 rounded-xl bg-green-600 text-2xl font-bold">+</button>
+                    </div>
+                </div>
+
+                <button onclick="submitOrder()" id="btn-submit"
+                    class="w-full bg-green-600 hover:bg-green-500 text-white font-black p-5 rounded-2xl mt-4 shadow-lg shadow-green-900/20 transition-all active:scale-95">
+                    HANTAR TEMPAHAN
+                </button>
+            </div>
+        </section>
+
+        <footer class="pt-10 pb-20 text-center">
+            <button onclick="openAdmin()" class="text-slate-600 hover:text-slate-400 text-xs font-bold uppercase tracking-widest border-b border-slate-800 pb-1">
+                Admin Panel
+            </button>
+        </footer>
+
+    </main>
 
     <script>
+        // MASUKKAN URL APPS SCRIPT ANDA DI SINI
         const API_URL = "https://script.google.com/macros/s/AKfycbzt4tWgnn7SFr_mgo4rMi17Efga02dwyP3E6f3y9JLGnI4PSTXPAsQCAFQfv7DGAHgW/exec";
+        
+        let kg = 1;
 
-        async function loadData() {
+        // Ambil info sesi (Tarikh, Harga, Lokasi) secara automatik
+        window.onload = async () => {
             try {
-                const response = await fetch(`${API_URL}?action=getData`);
-                const data = await response.json();
-                document.getElementById('t-tarikh').innerText = data.tarikh;
-                document.getElementById('t-lokasi').innerText = data.lokasi;
-                document.getElementById('t-harga').innerText = data.harga;
-                
-                const logHtml = data.log.length > 0 
-                    ? data.log.map(r => `<div class="p-2 border-b flex justify-between"><span>${r[0]}</span><span class="font-bold">${r[1]}kg</span></div>`).join('')
-                    : "Tiada pesanan lagi.";
-                document.getElementById('logList').innerHTML = logHtml;
+                const res = await fetch(`${API_URL}?action=getData`);
+                const data = await res.json();
+                document.getElementById('display-tarikh').innerText = data.tarikh;
+                document.getElementById('display-harga').innerText = `RM${data.harga} / KG`;
+                document.getElementById('display-lokasi').innerText = `Lokasi: ${data.lokasi}`;
             } catch (e) {
-                console.error(e);
+                console.log("Ralat tarik data");
+            }
+        };
+
+        function adjustKg(val) {
+            kg = Math.max(1, kg + val);
+            document.getElementById('kg-value').innerText = kg;
+        }
+
+        async function submitOrder() {
+            const nama = document.getElementById('nama').value;
+            const whatsapp = document.getElementById('whatsapp').value;
+            const btn = document.getElementById('btn-submit');
+
+            if (!nama || !whatsapp) return alert("Sila isi nama dan WhatsApp!");
+
+            btn.innerHTML = `<span class="spinner mr-2"></span> Memproses...`;
+            btn.disabled = true;
+
+            try {
+                const payload = {
+                    action: 'addOrder',
+                    nama: nama,
+                    whatsapp: whatsapp,
+                    kuantiti: kg
+                };
+
+                // Guna mode 'no-cors' untuk Apps Script POST
+                await fetch(API_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: JSON.stringify(payload)
+                });
+
+                alert("Tempahan Berjaya! Sila tunggu info dari kami.");
+                location.reload();
+            } catch (e) {
+                alert("Ralat menghantar tempahan.");
+                btn.innerHTML = "HANTAR TEMPAHAN";
+                btn.disabled = false;
             }
         }
 
-        function switchTab(tab) {
-            document.getElementById('tab-order').classList.toggle('hidden', tab !== 'order');
-            document.getElementById('tab-log').classList.toggle('hidden', tab !== 'log');
-            document.getElementById('btn-order').className = tab === 'order' ? 'pb-2 border-b-2 border-green-600 text-green-600' : 'pb-2 text-gray-400';
-            document.getElementById('btn-log').className = tab === 'log' ? 'pb-2 border-b-2 border-green-600 text-green-600' : 'pb-2 text-gray-400';
-        }
-
+        // FUNGSI ADMIN: Terus link ke admin.html
         function openAdmin() {
-    // Terus buka page admin.html di dalam repo yang sama
-    window.location.href = "admin.html";
-}
-
-}
-
-
-        document.getElementById('orderForm').onsubmit = async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('submitBtn');
-            btn.disabled = true; btn.innerText = "Menghantar...";
-            
-            const payload = {
-                action: "addOrder",
-                nama: document.getElementById('nama').value,
-                whatsapp: document.getElementById('whatsapp').value,
-                kuantiti: document.getElementById('kuantiti').value
-            };
-
-            await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
-            alert("Berjaya! Jumpa di lokasi nanti.");
-            location.reload();
-        };
-
-        window.onload = loadData;
+            window.location.href = "admin.html";
+        }
     </script>
 </body>
 </html>
