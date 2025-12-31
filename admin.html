@@ -78,9 +78,24 @@
             `).join('');
         }
 
-        async function updateStatus(nama) {
-            alert("Fungsi tukar status sedang dihubungkan ke Sheets. Buat masa ni, sila tukar di Sheets dulu.");
-        }
+        async function updateStatus(namaPelanggan) {
+    if(!confirm(`Tanda '${namaPelanggan}' sebagai Dah Bayar?`)) return;
+    
+    try {
+        const res = await fetch(API_URL, {
+            method: 'POST',
+            body: JSON.stringify({
+                action: 'updateStatus',
+                nama: namaPelanggan
+            })
+        });
+        alert("Status Berjaya Dikemaskini!");
+        location.reload(); // Refresh untuk tengok perubahan
+    } catch (e) {
+        alert("Gagal kemaskini status.");
+    }
+}
+
     </script>
 </body>
 </html>
